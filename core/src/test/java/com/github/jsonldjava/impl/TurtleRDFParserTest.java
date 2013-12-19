@@ -19,9 +19,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.github.jsonldjava.core.JSONLD;
-import com.github.jsonldjava.core.JSONLDProcessingError;
-import com.github.jsonldjava.core.Options;
+import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.RDFDataset;
 import com.github.jsonldjava.core.RDFDataset.Quad;
 import com.github.jsonldjava.core.RDFDatasetUtils;
@@ -33,7 +31,7 @@ import com.github.jsonldjava.utils.Obj;
 public class TurtleRDFParserTest {
 
     // @Test
-    public void simpleTest() throws JSONLDProcessingError {
+    public void simpleTest() throws JsonLdError {
 
         final String input = "@prefix ericFoaf: <http://www.w3.org/People/Eric/ericP-foaf.rdf#> .\n"
                 + "@prefix : <http://xmlns.com/foaf/0.1/> .\n"
@@ -109,11 +107,11 @@ public class TurtleRDFParserTest {
             }
         };
 
-        final Object json = JSONLD.fromRDF(input, new Options() {
-            {
-                format = "text/turtle";
-            }
-        }, new TurtleRDFParser());
+        final Object json = null; /*
+                                   * JsonLdProcessor.fromRDF(input, new
+                                   * JsonLdOptions() { { format = "text/turtle";
+                                   * } }, new TurtleRDFParser());
+                                   */
         assertTrue(Obj.equals(expected, json));
     }
 
@@ -153,7 +151,7 @@ public class TurtleRDFParserTest {
     }
 
     @Test
-    public void runTest() throws IOException, JSONLDProcessingError {
+    public void runTest() throws IOException, JsonLdError {
         final String inputfn = (String) Obj.get(test, "mf:action", "@id");
         final String outputfn = (String) Obj.get(test, "mf:result", "@id");
         final String type = (String) Obj.get(test, "@type");
@@ -170,24 +168,27 @@ public class TurtleRDFParserTest {
                         + "Result  : " + RDFDatasetUtils.toNQuads(result);
             }
         } else if ("rdft:TestTurtlePositiveSyntax".equals(type)) {
-            JSONLD.fromRDF(input, new Options("http://example/base/") {
-                {
-                    format = "text/turtle";
-                }
-            });
-            passed = true; // otherwise an exception would have been thrown
+            /*
+             * JsonLdProcessor.fromRDF(input, new
+             * JsonLdOptions("http://example/base/") { { format = "text/turtle";
+             * } }); passed = true; // otherwise an exception would have been
+             * thrown
+             */
+            // TODO: temporary until new code is done
+            throw new JsonLdError(JsonLdError.Error.NOT_IMPLEMENTED, "");
         } else if ("rdft:TestTurtleNegativeSyntax".equals(type)
                 || "rdft:TestTurtleNegativeEval".equals(type)) {
             // TODO: need to figure out how to properly deal with negative tests
             try {
-                JSONLD.fromRDF(input, new Options("http://example/base/") {
-                    {
-                        format = "text/turtle";
-                    }
-                });
+                /*
+                 * JsonLdProcessor.fromRDF(input, new
+                 * JsonLdOptions("http://example/base/") { { format =
+                 * "text/turtle"; } });
+                 */
                 failmsg = "Expected parse error, but no problems detected";
-            } catch (final JSONLDProcessingError e) {
-                if (e.getType() == JSONLDProcessingError.ErrorType.PARSE_ERROR) {
+                throw new JsonLdError(JsonLdError.Error.NOT_IMPLEMENTED, "");
+            } catch (final JsonLdError e) {
+                if (e.getType() == JsonLdError.Error.PARSE_ERROR) {
                     passed = true;
                 } else {
                     failmsg = "Expected parse error, got: " + e.getMessage();

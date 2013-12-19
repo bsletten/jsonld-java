@@ -1,3 +1,5 @@
+Note: this is the documentation for the current unstable development branch. [For the stable release documentation see here](https://github.com/jsonld-java/jsonld-java/blob/b8dc62201bb192875ed92e0156e26c94bc38ba82/README.md).
+
 JSONLD-JAVA
 ===========
 
@@ -24,14 +26,14 @@ Code example
     // Number or null depending on the root object in the file).
     Object jsonObject = JSONUtils.fromInputStream(inputStream);
     // Call whichever JSONLD function you want! (e.g. compact)
-    Object compact = JSONLD.compact(jsonObject);
+    Object compact = JsonLdProcessor.compact(jsonObject);
     // Print out the result (or don't, it's your call!)
     System.out.println(JSONUtils.toString(normalized));
 
 Processor options
 -----------------
 
-The Options specified by the [JSON-LD API Specification](http://json-ld.org/spec/latest/json-ld-api/#jsonldoptions) are accessible via the `com.github.jsonldjava.core.Options` class, and each `JSONLD.*` function has an optional input to take an instance of this class.
+The Options specified by the [JSON-LD API Specification](http://json-ld.org/spec/latest/json-ld-api/#jsonldoptions) are accessible via the `com.github.jsonldjava.core.JsonLdOptions` class, and each `JsonLdProcessor.*` function has an optional input to take an instance of this class.
 
 RDF implementation specific code
 --------------------------------
@@ -76,22 +78,41 @@ to run only core package tests
 
 Implementation Reports conforming to the [JSON-LD Implementation Report](http://json-ld.org/test-suite/reports/#instructions-for-submitting-implementation-reports) document can be generated using the following command:
 
-    mvn test -pl core -Dtest=JSONLDProcessorTest -Dreport.format=<format>
+    mvn test -pl core -Dtest=JsonLdProcessorTest -Dreport.format=<format>
 
 Current possible values for `<format>` include JSON-LD (`application/ld+json` or `jsonld`), NQuads (`text/plain`, `nquads`, `ntriples`, `nq` or `nt`) and Turtle (`text/turtle`, `turtle` or `ttl`). `*` can be used to generate reports in all available formats.
 
 CHANGELOG
 =========
 
-### 30.09.2013
+### 2013-11-22
+
+* updated jena writer
+
+### 2013-11-07
+
+* Integration packages renamed com.github.jsonldjava.sesame, 
+  com.github.jsonldjava.jena etc. (Issue #76)  
+
+### 2013-10-07
+
+* Matched class names to Spec
+ - Renamed `JSONLDException` to `JsonLdError`
+ - Renamed `JSONLDProcessor` to `JsonLdApi`
+ - Renamed `JSONLD` to `JsonLdProcessor`
+ - Renamed `ActiveContext` to `Context`
+ - Renamed `Options` to `JsonLdOptions`
+* All context related utility functions moved to be members of the `Context` class
+
+### 2013-09-30
 * Fixed JSON-LD to Jena to handle of BNodes
 
-### 02.09.2013
+### 2013-09-02
 
 * Add RDF2Go integration
 * Bump Sesame and Clerezza dependency versions
 
-### 18.06.2013
+### 2013-06-18
 
 * Bump to version 0.2
 * Updated Turtle integration
@@ -100,34 +121,41 @@ CHANGELOG
 * Fixed up seasame integration package names
 * Replaced depreciated Jackson code
 
-### 19.05.2013
+### 2013-05-19
 
 * Added Turtle RDFParser and TripleCallback
 * Changed Maven groupIds to `com.github.jsonld-java` to match github domain.
 * Released version 0.1
 
-### 16.05.2013
+### 2013-05-16
 
 * Updated core code to match [JSON-LD 1.0 Processing Algorithms and API / W3C Editor's Draft 14 May 2013](http://json-ld.org/spec/latest/json-ld-api/)
 * Deprecated JSONLDSerializer in favor of the RDFParser interface to better represent the purpose of the interface and better fit in with the updated core code.
 * Updated the JSONLDTripleCallback to better fit with the updated code.
 * Updated the Playground tool to support updated core code.
 
-### 07.05.2013
+### 2013-05-07
 
 * Changed base package names to com.github.jsonldjava
 * Reverted version to 0.1-SNAPSHOT to allow version incrementing pre 1.0 while allowing a 1.0 release when the json-ld spec is finalised.
 * Turned JSONLDTripleCallback into an interface.
 
-### 18.04.2013
+### 2013-04-18
 
 * Updated to Sesame 2.7.0, Jena 2.10.0, Jackson 2.1.4
 * Fixing a character encoding issue in the JSONLDProcessorTests
 * Bumping to 1.0.1 to reflect dependency changes
 
-### 30.10.2012
+### 2012-10-30
 
 * Brought the implementation up to date with the reference implementation (minus the normalization stuff)
 * Changed entry point for the functions to the static functions in the JSONLD class
 * Changed the JSONLDSerializer to an abstract class, requiring the implementation of a "parse" function. The JSONLDSerializer is now passed to the JSONLD.fromRDF function.
 * Added JSONLDProcessingError class to handle errors more efficiently
+
+
+Considerations for 1.0 release / optimisations
+=========
+
+* The `Context` class is a `Map` and many of the options are stored as values of the map. These could be made into variables, whice should speed things up a bit (the same with the termDefinitions variable inside the Context).
+* some sort of document loader interface (with a mockup for testing) is required
