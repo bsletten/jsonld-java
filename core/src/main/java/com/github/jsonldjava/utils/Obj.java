@@ -1,26 +1,57 @@
 package com.github.jsonldjava.utils;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Obj {
 
     /**
+     * Helper function for creating maps and tuning them as necessary.
+     *
+     * @return A new {@link Map} instance.
+     */
+    public static Map<String, Object> newMap() {
+        return new LinkedHashMap<String, Object>(2, 0.75f);
+    }
+
+    /**
+     * Helper function for creating maps and tuning them as necessary.
+     *
+     * @param key
+     *            A key to add to the map on creation.
+     * @param value
+     *            A value to attach to the key in the new map.
+     * @return A new {@link Map} instance.
+     */
+    public static Map<String, Object> newMap(String key, Object value) {
+        final Map<String, Object> result = newMap();
+        result.put(key, value);
+        return result;
+    }
+
+    /**
      * Used to make getting values from maps embedded in maps embedded in maps
      * easier TODO: roll out the loops for efficiency
-     * 
+     *
      * @param map
+     *            The map to get a key from
      * @param keys
-     * @return
+     *            The list of keys to attempt to get from the map. The first key
+     *            found with a non-null value is returned, or if none are found,
+     *            the original map is returned.
+     * @return The key from the map, or the original map if none of the keys are
+     *         found.
      */
-    public static Object get(Object map, String... keys) {
+    public static Object get(Map<String, Object> map, String... keys) {
+        Map<String, Object> result = map;
         for (final String key : keys) {
-            map = ((Map<String, Object>) map).get(key);
+            result = (Map<String, Object>) map.get(key);
             // make sure we don't crash if we get a null somewhere down the line
-            if (map == null) {
-                return map;
+            if (result == null) {
+                return result;
             }
         }
-        return map;
+        return result;
     }
 
     public static Object put(Object map, String key1, Object value) {
@@ -62,7 +93,7 @@ public class Obj {
 
     /**
      * A null-safe equals check using v1.equals(v2) if they are both not null.
-     * 
+     *
      * @param v1
      *            The source object for the equals check.
      * @param v2

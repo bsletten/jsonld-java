@@ -21,14 +21,16 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -36,8 +38,9 @@ import org.junit.runners.Parameterized.Parameters;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.github.jsonldjava.impl.TurtleTripleCallback;
-import com.github.jsonldjava.utils.JSONUtils;
+import com.github.jsonldjava.utils.JsonUtils;
 import com.github.jsonldjava.utils.Obj;
+import com.github.jsonldjava.utils.TestUtils;
 
 @RunWith(Parameterized.class)
 public class JsonLdProcessorTest {
@@ -94,7 +97,7 @@ public class JsonLdProcessorTest {
                         // project
                         add(new LinkedHashMap<String, Object>() {
                             {
-                                put("@id", "http://github.com/jsonld-java/jsonld-java");
+                                put("@id", "https://github.com/jsonld-java/jsonld-java");
                                 put("@type", new ArrayList<Object>() {
                                     {
                                         add("doap:Project");
@@ -103,7 +106,7 @@ public class JsonLdProcessorTest {
                                     }
                                 });
                                 put("doap:name", "JSONLD-Java");
-                                put("doap:homepage", "http://github.com/jsonld-java/jsonld-java");
+                                put("doap:homepage", "https://github.com/jsonld-java/jsonld-java");
                                 put("doap:description", new LinkedHashMap<String, Object>() {
                                     {
                                         put("@value",
@@ -153,7 +156,7 @@ public class JsonLdProcessorTest {
 
     @AfterClass
     public static void writeReport() throws JsonGenerationException, JsonMappingException,
-            IOException, JsonLdError {
+    IOException, JsonLdError {
 
         // Only write reports if "-Dreport.format=..." is set
         String reportFormat = System.getProperty("report.format");
@@ -166,7 +169,7 @@ public class JsonLdProcessorTest {
         if ("application/ld+json".equals(reportFormat) || "jsonld".equals(reportFormat)
                 || "*".equals(reportFormat)) {
             System.out.println("Generating JSON-LD Report");
-            JSONUtils.writePrettyPrint(new OutputStreamWriter(new FileOutputStream(reportOutputFile
+            JsonUtils.writePrettyPrint(new OutputStreamWriter(new FileOutputStream(reportOutputFile
                     + ".jsonld")), REPORT);
         }
 
@@ -238,7 +241,7 @@ public class JsonLdProcessorTest {
             // System.out.println("Reading: " + in.getCanonicalPath());
             final FileInputStream manifestfile = new FileInputStream(in);
 
-            final Map<String, Object> manifest = (Map<String, Object>) JSONUtils
+            final Map<String, Object> manifest = (Map<String, Object>) JsonUtils
                     .fromInputStream(manifestfile);
 
             for (final Map<String, Object> test : (List<Map<String, Object>>) manifest
@@ -255,7 +258,7 @@ public class JsonLdProcessorTest {
                             test.get("@id"), test });
                 } else {
                     // TODO: many disabled while implementation is incomplete
-                    // System.out.println("Skipping test: " + test.get("name"));
+                    System.out.println("Skipping test: " + test.get("name"));
                 }
             }
         }
@@ -278,21 +281,49 @@ public class JsonLdProcessorTest {
             if (url.contains(":")) {
                 // check if the url is relative to the test base
                 if (url.startsWith(this.base)) {
-                    url = url.substring(this.base.length());
-                } else {
-                    // we can't load remote documents from the test suite
-                    throw new JsonLdError(JsonLdError.Error.NOT_IMPLEMENTED);
+                    final String classpath = url.substring(this.base.length());
+                    final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                    final InputStream inputStream = cl.getResourceAsStream(TEST_DIR + "/"
+                            + classpath);
+                    try {
+                        return new RemoteDocument(url, JsonUtils.fromInputStream(inputStream));
+                    } catch (final IOException e) {
+                        throw new JsonLdError(JsonLdError.Error.LOADING_DOCUMENT_FAILED);
+                    }
                 }
             }
-            final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            final InputStream inputStream = cl.getResourceAsStream(TEST_DIR + "/" + url);
-            try {
-                return new RemoteDocument(url, JSONUtils.fromInputStream(inputStream));
-            } catch (final IOException e) {
-                throw new JsonLdError(JsonLdError.Error.LOADING_DOCUMENT_FAILED);
-            }
+            // we can't load this remote document from the test suite
+            throw new JsonLdError(JsonLdError.Error.NOT_IMPLEMENTED);
+        }
+
+        public void setRedirectTo(String string) {
+            // TODO Auto-generated method stub
+
+        }
+
+        public void setHttpStatus(Integer integer) {
+            // TODO Auto-generated method stub
+
+        }
+
+        public void setContentType(String string) {
+            // TODO Auto-generated method stub
+
+        }
+
+        public void addHttpLink(String nextLink) {
+            // TODO Auto-generated method stub
+
         }
     }
+
+    // @Rule
+    // public Timeout timeout = new Timeout(10000);
+
+    @Rule
+    public TemporaryFolder tempDir = new TemporaryFolder();
+
+    private File testDir;
 
     private final String group;
     private final Map<String, Object> test;
@@ -302,17 +333,9 @@ public class JsonLdProcessorTest {
         this.test = test;
     }
 
-    public static String join(Collection<String> list, String delim) {
-        final StringBuilder builder = new StringBuilder();
-        final Iterator<String> iter = list.iterator();
-        while (iter.hasNext()) {
-            builder.append(iter.next());
-            if (!iter.hasNext()) {
-                break;
-            }
-            builder.append(delim);
-        }
-        return builder.toString();
+    @Before
+    public void setUp() throws Exception {
+        testDir = tempDir.newFolder("jsonld");
     }
 
     @Test
@@ -330,7 +353,7 @@ public class JsonLdProcessorTest {
 
         Object input = null;
         if (inputType.equals("jsonld")) {
-            input = JSONUtils.fromInputStream(inputStream);
+            input = JsonUtils.fromInputStream(inputStream);
         } else if (inputType.equals("nt") || inputType.equals("nq")) {
             final List<String> inputLines = new ArrayList<String>();
             final BufferedReader buf = new BufferedReader(new InputStreamReader(inputStream,
@@ -344,7 +367,7 @@ public class JsonLdProcessorTest {
                 inputLines.add(line);
             }
             // Collections.sort(inputLines);
-            input = join(inputLines, "\n");
+            input = TestUtils.join(inputLines, "\n");
         }
         Object expect = null;
         String sparql = null;
@@ -363,7 +386,7 @@ public class JsonLdProcessorTest {
             } else {
                 final String expectType = expectFile.substring(expectFile.lastIndexOf(".") + 1);
                 if (expectType.equals("jsonld")) {
-                    expect = JSONUtils.fromInputStream(expectStream);
+                    expect = JsonUtils.fromInputStream(expectStream);
                 } else if (expectType.equals("nt") || expectType.equals("nq")) {
                     final List<String> expectLines = new ArrayList<String>();
                     final BufferedReader buf = new BufferedReader(new InputStreamReader(
@@ -377,7 +400,7 @@ public class JsonLdProcessorTest {
                         expectLines.add(line);
                     }
                     Collections.sort(expectLines);
-                    expect = join(expectLines, "\n");
+                    expect = TestUtils.join(expectLines, "\n");
                 } else {
                     expect = "";
                     assertFalse("Unknown expect type: " + expectType, true);
@@ -403,7 +426,9 @@ public class JsonLdProcessorTest {
         // OPTIONS SETUP
         final JsonLdOptions options = new JsonLdOptions("http://json-ld.org/test-suite/tests/"
                 + test.get("input"));
-        options.documentLoader = new TestDocumentLoader("http://json-ld.org/test-suite/tests/");
+        final TestDocumentLoader testLoader = new TestDocumentLoader(
+                "http://json-ld.org/test-suite/tests/");
+        options.setDocumentLoader(testLoader);
         if (test.containsKey("option")) {
             final Map<String, Object> test_opts = (Map<String, Object>) test.get("option");
             if (test_opts.containsKey("base")) {
@@ -412,7 +437,7 @@ public class JsonLdProcessorTest {
             if (test_opts.containsKey("expandContext")) {
                 final InputStream contextStream = cl.getResourceAsStream(TEST_DIR + "/"
                         + test_opts.get("expandContext"));
-                options.setExpandContext(JSONUtils.fromInputStream(contextStream));
+                options.setExpandContext(JsonUtils.fromInputStream(contextStream));
             }
             if (test_opts.containsKey("compactArrays")) {
                 options.setCompactArrays((Boolean) test_opts.get("compactArrays"));
@@ -427,16 +452,22 @@ public class JsonLdProcessorTest {
                 options.setProduceGeneralizedRdf((Boolean) test_opts.get("produceGeneralizedRdf"));
             }
             if (test_opts.containsKey("redirectTo")) {
-                // TODO: Handle redirectTo for remote-doc tests
+                testLoader.setRedirectTo((String) test_opts.get("redirectTo"));
             }
             if (test_opts.containsKey("httpStatus")) {
-                // TODO: Handle httpStatus for remote-doc tests
+                testLoader.setHttpStatus((Integer) test_opts.get("httpStatus"));
             }
             if (test_opts.containsKey("contentType")) {
-                // TODO: Handle contentType for remote-doc tests
+                testLoader.setContentType((String) test_opts.get("contentType"));
             }
             if (test_opts.containsKey("httpLink")) {
-                // TODO: Handle httpLink for remote-doc tests
+                if (test_opts.get("httpLink") instanceof List) {
+                    for (final String nextLink : (List<String>) test_opts.get("httpLink")) {
+                        testLoader.addHttpLink(nextLink);
+                    }
+                } else {
+                    testLoader.addHttpLink((String) test_opts.get("httpLink"));
+                }
             }
         }
 
@@ -447,13 +478,13 @@ public class JsonLdProcessorTest {
             } else if (testType.contains("jld:CompactTest")) {
                 final InputStream contextStream = cl.getResourceAsStream(TEST_DIR + "/"
                         + test.get("context"));
-                final Object contextJson = JSONUtils.fromInputStream(contextStream);
+                final Object contextJson = JsonUtils.fromInputStream(contextStream);
                 result = JsonLdProcessor.compact(input, contextJson, options);
             } else if (testType.contains("jld:FlattenTest")) {
                 if (test.containsKey("context")) {
                     final InputStream contextStream = cl.getResourceAsStream(TEST_DIR + "/"
                             + test.get("context"));
-                    final Object contextJson = JSONUtils.fromInputStream(contextStream);
+                    final Object contextJson = JsonUtils.fromInputStream(contextStream);
                     result = JsonLdProcessor.flatten(input, contextJson, options);
                 } else {
                     result = JsonLdProcessor.flatten(input, options);
@@ -461,7 +492,7 @@ public class JsonLdProcessorTest {
             } else if (testType.contains("jld:FrameTest")) {
                 final InputStream frameStream = cl.getResourceAsStream(TEST_DIR + "/"
                         + test.get("frame"));
-                final Map<String, Object> frameJson = (Map<String, Object>) JSONUtils
+                final Map<String, Object> frameJson = (Map<String, Object>) JsonUtils
                         .fromInputStream(frameStream);
                 result = JsonLdProcessor.frame(input, frameJson, options);
             } else if (testType.contains("jld:FromRDFTest")) {
@@ -520,7 +551,7 @@ public class JsonLdProcessorTest {
                 });
                 put("earl:subject", new LinkedHashMap<String, Object>() {
                     {
-                        put("@id", "http://github.com/jsonld-java/jsonld-java");
+                        put("@id", "https://github.com/jsonld-java/jsonld-java");
                     }
                 });
                 put("earl:test", new LinkedHashMap<String, Object>() {
@@ -550,7 +581,7 @@ public class JsonLdProcessorTest {
                     {
                         put("@id",
                                 "http://json-ld.org/test-suite/tests/error-expand-manifest.jsonld"
-                                        .equals(manifest) ? "earl:semiAuto" : "earl:automatic");
+                                .equals(manifest) ? "earl:semiAuto" : "earl:automatic");
                     }
                 });
             }
@@ -568,10 +599,10 @@ public class JsonLdProcessorTest {
                         + test.get("expect")
                         + ")\n"
                         + "expected: "
-                        + JSONUtils.toPrettyString(expect)
+                        + JsonUtils.toPrettyString(expect)
                         + "\nresult: "
                         + (result instanceof JsonLdError ? ((JsonLdError) result).toString()
-                                : JSONUtils.toPrettyString(result)), testpassed);
+                                : JsonUtils.toPrettyString(result)), testpassed);
     }
 
 }

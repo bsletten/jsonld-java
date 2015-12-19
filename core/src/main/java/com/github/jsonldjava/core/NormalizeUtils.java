@@ -31,7 +31,7 @@ class NormalizeUtils {
         this.namer = namer;
     }
 
-    // generates unique and duplicate hashes for bnodes
+    // generates unique and duplicate hashes for bnodes 
     public Object hashBlankNodes(Collection<String> unnamed_) throws JsonLdError {
         List<String> unnamed = new ArrayList<String>(unnamed_);
         List<String> nextUnnamed = new ArrayList<String>();
@@ -106,11 +106,11 @@ class NormalizeUtils {
                                     }
                                 }
                                 normalized
-                                        .add(toNQuad(
-                                                (RDFDataset.Quad) quad,
-                                                quad.containsKey("name")
-                                                        && quad.get("name") != null ? (String) ((Map<String, Object>) quad
-                                                        .get("name")).get("value") : null));
+                                .add(toNQuad(
+                                        (RDFDataset.Quad) quad,
+                                        quad.containsKey("name")
+                                        && quad.get("name") != null ? (String) ((Map<String, Object>) quad
+                                                .get("name")).get("value") : null));
                             }
 
                             // sort normalized output
@@ -119,21 +119,21 @@ class NormalizeUtils {
                             // handle output format
                             if (options.format != null) {
                                 if ("application/nquads".equals(options.format)) {
-                                    String rval = "";
+                                    StringBuilder rval = new StringBuilder();
                                     for (final String n : normalized) {
-                                        rval += n;
+                                        rval.append(n);
                                     }
-                                    return rval;
+                                    return rval.toString();
                                 } else {
                                     throw new JsonLdError(JsonLdError.Error.UNKNOWN_FORMAT,
                                             options.format);
                                 }
                             }
-                            String rval = "";
+                            StringBuilder rval = new StringBuilder();
                             for (final String n : normalized) {
-                                rval += n;
+                                rval.append(n);
                             }
-                            return parseNQuads(rval);
+                            return parseNQuads(rval.toString());
                         }
 
                         // name each group member
@@ -211,7 +211,7 @@ class NormalizeUtils {
      * incorporating all information about its subgraph of bnodes. This method
      * will recursively pick adjacent bnode permutations that produce the
      * lexicographically-least 'path' serializations.
-     * 
+     *
      * @param id
      *            the ID of the bnode to hash paths for.
      * @param bnodes
@@ -413,14 +413,14 @@ class NormalizeUtils {
 
     /**
      * Hashes all of the quads about a blank node.
-     * 
+     *
      * @param id
      *            the ID of the bnode to hash quads for.
      * @param bnodes
      *            the mapping of bnodes to quads.
      * @param namer
      *            the canonical bnode namer.
-     * 
+     *
      * @return the new hash.
      */
     private static String hashQuads(String id, Map<String, Object> bnodes, UniqueNamer namer) {
@@ -448,7 +448,7 @@ class NormalizeUtils {
 
     /**
      * A helper class to sha1 hash all the strings in a collection
-     * 
+     *
      * @param nquads
      * @return
      */
@@ -480,18 +480,18 @@ class NormalizeUtils {
      * A helper function that gets the blank node name from an RDF quad node
      * (subject or object). If the node is a blank node and its value does not
      * match the given blank node ID, it will be returned.
-     * 
+     *
      * @param node
      *            the RDF quad node.
      * @param id
      *            the ID of the blank node to look next to.
-     * 
+     *
      * @return the adjacent blank node name or null if none was found.
      */
     private static String getAdjacentBlankNodeName(Map<String, Object> node, String id) {
         return "blank node".equals(node.get("type"))
                 && (!node.containsKey("value") || !Obj.equals(node.get("value"), id)) ? (String) node
-                .get("value") : null;
+                        .get("value") : null;
     }
 
     private static class Permutator {
@@ -512,7 +512,7 @@ class NormalizeUtils {
 
         /**
          * Returns true if there is another permutation.
-         * 
+         *
          * @return true if there is another permutation, false if not.
          */
         public boolean hasNext() {
@@ -522,7 +522,7 @@ class NormalizeUtils {
         /**
          * Gets the next permutation. Call hasNext() to ensure there is another
          * one first.
-         * 
+         *
          * @return the next permutation.
          */
         public List<String> next() {

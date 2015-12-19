@@ -1,13 +1,13 @@
 package com.github.jsonldjava.impl;
 
-import static com.github.jsonldjava.core.JSONLDConsts.RDF_FIRST;
-import static com.github.jsonldjava.core.JSONLDConsts.RDF_NIL;
-import static com.github.jsonldjava.core.JSONLDConsts.RDF_REST;
-import static com.github.jsonldjava.core.JSONLDConsts.XSD_BOOLEAN;
-import static com.github.jsonldjava.core.JSONLDConsts.XSD_DOUBLE;
-import static com.github.jsonldjava.core.JSONLDConsts.XSD_FLOAT;
-import static com.github.jsonldjava.core.JSONLDConsts.XSD_INTEGER;
-import static com.github.jsonldjava.core.JSONLDConsts.XSD_STRING;
+import static com.github.jsonldjava.core.JsonLdConsts.RDF_FIRST;
+import static com.github.jsonldjava.core.JsonLdConsts.RDF_NIL;
+import static com.github.jsonldjava.core.JsonLdConsts.RDF_REST;
+import static com.github.jsonldjava.core.JsonLdConsts.XSD_BOOLEAN;
+import static com.github.jsonldjava.core.JsonLdConsts.XSD_DOUBLE;
+import static com.github.jsonldjava.core.JsonLdConsts.XSD_FLOAT;
+import static com.github.jsonldjava.core.JsonLdConsts.XSD_INTEGER;
+import static com.github.jsonldjava.core.JsonLdConsts.XSD_STRING;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,16 +19,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.github.jsonldjava.core.JSONLDTripleCallback;
+import com.github.jsonldjava.core.JsonLdTripleCallback;
 import com.github.jsonldjava.core.RDFDataset;
 
-public class TurtleTripleCallback implements JSONLDTripleCallback {
+public class TurtleTripleCallback implements JsonLdTripleCallback {
 
     private static final int MAX_LINE_LENGTH = 160;
     private static final int TAB_SPACES = 4;
     private static final String COLS_KEY = "..cols.."; // this shouldn't be a
-                                                       // valid iri/bnode i
-                                                       // hope!
+    // valid iri/bnode i
+    // hope!
     final Map<String, String> availableNamespaces = new LinkedHashMap<String, String>() {
         {
             // TODO: fill with default namespaces
@@ -330,7 +330,7 @@ public class TurtleTripleCallback implements JSONLDTripleCallback {
             if (!isObject) {
                 rval += " .\n";
                 if (subjIter.hasNext()) { // add blank space if we have another
-                                          // object below this
+                    // object below this
                     rval += "\n";
                 }
             }
@@ -351,7 +351,7 @@ public class TurtleTripleCallback implements JSONLDTripleCallback {
     /**
      * checks the URI for a prefix, and if one is found, set used prefixes to
      * true
-     * 
+     *
      * @param predicate
      * @return
      */

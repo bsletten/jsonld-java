@@ -1,14 +1,14 @@
 package com.github.jsonldjava.impl;
 
-import static com.github.jsonldjava.core.JSONLDConsts.RDF_FIRST;
-import static com.github.jsonldjava.core.JSONLDConsts.RDF_LANGSTRING;
-import static com.github.jsonldjava.core.JSONLDConsts.RDF_NIL;
-import static com.github.jsonldjava.core.JSONLDConsts.RDF_REST;
-import static com.github.jsonldjava.core.JSONLDConsts.RDF_TYPE;
-import static com.github.jsonldjava.core.JSONLDConsts.XSD_BOOLEAN;
-import static com.github.jsonldjava.core.JSONLDConsts.XSD_DECIMAL;
-import static com.github.jsonldjava.core.JSONLDConsts.XSD_DOUBLE;
-import static com.github.jsonldjava.core.JSONLDConsts.XSD_INTEGER;
+import static com.github.jsonldjava.core.JsonLdConsts.RDF_FIRST;
+import static com.github.jsonldjava.core.JsonLdConsts.RDF_LANGSTRING;
+import static com.github.jsonldjava.core.JsonLdConsts.RDF_NIL;
+import static com.github.jsonldjava.core.JsonLdConsts.RDF_REST;
+import static com.github.jsonldjava.core.JsonLdConsts.RDF_TYPE;
+import static com.github.jsonldjava.core.JsonLdConsts.XSD_BOOLEAN;
+import static com.github.jsonldjava.core.JsonLdConsts.XSD_DECIMAL;
+import static com.github.jsonldjava.core.JsonLdConsts.XSD_DOUBLE;
+import static com.github.jsonldjava.core.JsonLdConsts.XSD_INTEGER;
 import static com.github.jsonldjava.core.RDFDatasetUtils.unescape;
 import static com.github.jsonldjava.core.Regex.BLANK_NODE_LABEL;
 import static com.github.jsonldjava.core.Regex.DECIMAL;
@@ -40,13 +40,13 @@ import com.github.jsonldjava.core.RDFParser;
 import com.github.jsonldjava.core.UniqueNamer;
 
 /**
- * A (probably terribly slow) Parser for turtle -> the internal RDFDataset used
- * by JSOND-Java
- * 
+ * A (probably terribly slow) Parser for turtle. Turtle is the internal
+ * RDFDataset used by JSOND-Java
+ *
  * TODO: this probably needs to be changed to use a proper parser/lexer
- * 
+ *
  * @author Tristan
- * 
+ *
  */
 public class TurtleRDFParser implements RDFParser {
 
@@ -109,9 +109,9 @@ public class TurtleRDFParser implements RDFParser {
 
         // int bnodes = 0;
         UniqueNamer namer = new UniqueNamer("_:b");// {{ getName(); }}; // call
-                                                   // getName() after
-                                                   // construction to make
-                                                   // first active bnode _:b1
+        // getName() after
+        // construction to make
+        // first active bnode _:b1
 
         private final Stack<Map<String, String>> stack = new Stack<Map<String, String>>();
         public boolean expectingBnodeClose = false;
@@ -180,7 +180,7 @@ public class TurtleRDFParser implements RDFParser {
             if ("".equals(line) && !endIsOK()) {
                 throw new JsonLdError(JsonLdError.Error.PARSE_ERROR,
                         "Error while parsing Turtle; unexpected end of input. {line: " + lineNumber
-                                + ", position:" + linePosition + "}");
+                        + ", position:" + linePosition + "}");
             }
         }
 
@@ -450,7 +450,7 @@ public class TurtleRDFParser implements RDFParser {
                 if (!RDF_FIRST.equals(state.curPredicate)) {
                     throw new JsonLdError(JsonLdError.Error.PARSE_ERROR,
                             "Error while parsing Turtle; unexpected ). {line: " + state.lineNumber
-                                    + "position: " + state.linePosition + "}");
+                            + "position: " + state.linePosition + "}");
                 }
                 result.addTriple(state.curSubject, RDF_REST, RDF_NIL);
                 state.pop();

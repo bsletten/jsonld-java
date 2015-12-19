@@ -1,40 +1,65 @@
 package com.github.jsonldjava.core;
 
 /**
- * http://json-ld.org/spec/latest/json-ld-api/#the-jsonldoptions-type
- * 
+ * The JsonLdOptions type as specified in the <a
+ * href="http://www.w3.org/TR/json-ld-api/#the-jsonldoptions-type">JSON-LD-API
+ * specification</a>.
+ *
  * @author tristan
- * 
+ *
  */
 public class JsonLdOptions {
+
+    /**
+     * Constructs an instance of JsonLdOptions using an empty base.
+     */
     public JsonLdOptions() {
-        this.setBase("");
+        this("");
     }
 
+    /**
+     * Constructs an instance of JsonLdOptions using the given base.
+     *
+     * @param base
+     *            The base IRI for the document.
+     */
     public JsonLdOptions(String base) {
         this.setBase(base);
     }
 
-    @Override
-    public JsonLdOptions clone() {
-        final JsonLdOptions rval = new JsonLdOptions(getBase());
-        return rval;
-    }
+    // Base options : http://www.w3.org/TR/json-ld-api/#idl-def-JsonLdOptions
 
-    // base options
-
+    /**
+     * http://www.w3.org/TR/json-ld-api/#widl-JsonLdOptions-base
+     */
     private String base = null;
-    private Boolean compactArrays = true;
-    private Object expandContext = null;
-    private String processingMode = "json-ld-1.0";
 
-    // frame options
+    /**
+     * http://www.w3.org/TR/json-ld-api/#widl-JsonLdOptions-compactArrays
+     */
+    private Boolean compactArrays = true;
+    /**
+     * http://www.w3.org/TR/json-ld-api/#widl-JsonLdOptions-expandContext
+     */
+    private Object expandContext = null;
+    /**
+     * http://www.w3.org/TR/json-ld-api/#widl-JsonLdOptions-processingMode
+     */
+    private String processingMode = "json-ld-1.0";
+    /**
+     * http://www.w3.org/TR/json-ld-api/#widl-JsonLdOptions-documentLoader
+     */
+    private DocumentLoader documentLoader = new DocumentLoader();
+
+    // Frame options : http://json-ld.org/spec/latest/json-ld-framing/
 
     private Boolean embed = null;
     private Boolean explicit = null;
     private Boolean omitDefault = null;
 
-    // rdf conversion options
+    // RDF conversion options :
+    // http://www.w3.org/TR/json-ld-api/#serialize-rdf-as-json-ld-algorithm
+
     Boolean useRdfType = false;
     Boolean useNativeTypes = false;
     private boolean produceGeneralizedRdf = false;
@@ -112,7 +137,6 @@ public class JsonLdOptions {
     }
 
     public boolean getProduceGeneralizedRdf() {
-        // TODO Auto-generated method stub
         return this.produceGeneralizedRdf;
     }
 
@@ -120,10 +144,17 @@ public class JsonLdOptions {
         this.produceGeneralizedRdf = produceGeneralizedRdf;
     }
 
+    public DocumentLoader getDocumentLoader() {
+        return documentLoader;
+    }
+
+    public void setDocumentLoader(DocumentLoader documentLoader) {
+        this.documentLoader = documentLoader;
+    }
+
     // TODO: THE FOLLOWING ONLY EXIST SO I DON'T HAVE TO DELETE A LOT OF CODE,
     // REMOVE IT WHEN DONE
     public String format = null;
     public Boolean useNamespaces = false;
     public String outputForm = null;
-    public DocumentLoader documentLoader;
 }

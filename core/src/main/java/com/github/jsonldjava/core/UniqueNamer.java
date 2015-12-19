@@ -11,9 +11,9 @@ public class UniqueNamer {
     /**
      * Creates a new UniqueNamer. A UniqueNamer issues unique names, keeping
      * track of any previously issued names.
-     * 
+     *
      * @param prefix
-     *            the prefix to use ('<prefix><counter>').
+     *            the prefix to use ('&lt;prefix&gt;&lt;counter&gt;').
      */
     public UniqueNamer(String prefix) {
         this.prefix = prefix;
@@ -23,7 +23,7 @@ public class UniqueNamer {
 
     /**
      * Copies this UniqueNamer.
-     * 
+     *
      * @return a copy of this UniqueNamer.
      */
     @Override
@@ -37,9 +37,10 @@ public class UniqueNamer {
     /**
      * Gets the new name for the given old name, where if no old name is given a
      * new name will be generated.
-     * 
-     * @param [oldName] the old name to get the new name for.
-     * 
+     *
+     * @param oldName
+     *            the old name to get the new name for.
+     *
      * @return the new name.
      */
     public String getName(String oldName) {
